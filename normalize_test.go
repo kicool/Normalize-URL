@@ -4,8 +4,6 @@ import (
   "testing"
   "strconv"
   "strings"
-  "sort"
-  "fmt"
 )
 
 var rawURLs = [...]string{
@@ -80,13 +78,13 @@ func TestControlChars(t *testing.T) {
 }
 
 func TestReservedChars(t *testing.T) {
-  for _, val := range reservedChars {
+  for val, _ := range reservedChars {
     testChar(t, val)
   }
 }
 
 func TestSomeUnsafeChars(t *testing.T) {
-  for _, val := range reservedChars {
+  for val, _ := range unsafeChars {
     if val != 35 || val != 37 {
       testChar(t, val)
     }
@@ -100,27 +98,24 @@ func TestNonASCIIChars(t *testing.T) {
 }
 
 func TestUnescapeChars(t *testing.T) {
-  searchSlice := make(sort.IntSlice, len(reservedChars)+len(unsafeChars))
-  copy(searchSlice, reservedChars[:])
-  copy(searchSlice, unsafeChars[:])
-  searchSlice.Sort()
   for i := 0; i < 256; i++ {
-    index := searchSlice.Search(i)
-    fmt.Println("Index:", index, "searchSlice[index]:", searchSlice[index],
-      "len(searchSlice):", len(searchSlice), "i:", i)
+    _, reserved := reservedChars[i]
+    _, unsafe := unsafeChars[i]
     switch {
     default:
-      //Do something
-      fmt.Println("Searching and testing against", i)
+      //Test char to make sure it's not escaped after normalized.
+      t.Log("Searching and testing against", i)
     case i <= controlCharEnd:
-      fmt.Println("Less than controlCharEnd", i, controlCharEnd)
+      t.Log("Less than controlCharEnd", i, controlCharEnd)
       continue
     case i >= nonASCIImin && i <= nonASCIImax:
-      fmt.Println("In non-ASCII range", i, nonASCIImin, nonASCIImax)
+      t.Log("In non-ASCII range", i, nonASCIImin, nonASCIImax)
       continue
-    case index < len(searchSlice):
-      fmt.Println("Found in searchSlice i:", i, "index:", index,
-        "searchSlice[index]:", searchSlice[index])
+    case reserved:
+      t.Log("In reservedChars", i, reservedChars[i])
+      continue
+    case unsafe:
+      t.Log("In unsafeChars", i, unsafeChars[i])
       continue
     }
   }

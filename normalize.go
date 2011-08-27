@@ -25,35 +25,35 @@ func (err NormalizeError) String() string {
 
 //Character values 0-31 need to be escaped in query strings:
 var controlCharEnd int = 31
-var reservedChars = [...]int{
-  36,  //$
-  38,  //&
-  43,  //+
-  44,  //,
-  47,  ///
-  58,  //:
-  59,  //;
-  61,  //=
-  63,  //?
-  64,  //@
-  127, //.
+var reservedChars = map[int]byte{
+  36: '$',
+  38: '&',
+  43: '+',
+  44: ',',
+  47: '/',
+  58: ':',
+  59: ';',
+  61: '=',
+  63: '?',
+  64: '@',
+  12: '.',
 }
-var unsafeChars = [...]int{
-  32,  //space
-  34,  //"
-  35,  //#
-  37,  //%
-  60,  //<
-  62,  //
-  91,  //[
-  92,  //\
-  93,  //]
-  94,  //^
-  96,  //`
-  123, //{
-  124, //|
-  125, //}
-  126, //~
+var unsafeChars = map[int] int{
+  32:  ' ',
+  34:  '"',
+  35:  '#',
+  37:  '%',
+  60:  '<',
+  62:  '>',
+  91:  '[',
+  92:  '\\',
+  93:  ']',
+  94:  '^',
+  96:  '`',
+  123: '{',
+  124: '|',
+  125: '}',
+  126: '~',
 }
 //Character values 128-255 need to be escaped.
 var nonASCIImin int = 128
