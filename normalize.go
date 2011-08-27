@@ -1,15 +1,15 @@
 package normalize
 
 import (
-  "os"
-  "url"
+	"os"
+	"url"
 )
 
 //Naive normalization, normalizes those aspects of a URL it can
 //without knowing much about it. Does not make changes that might
 //change the location which the URL points to
 func Normalize(url *url.URL) (err os.Error) {
-  return nil
+	return nil
 }
 
 //Remove #fragment from a URL.
@@ -55,51 +55,51 @@ func NormalizeScheme(url *url.URL, scheme string) {
 }
 
 func NewNormalizeError(description string) *NormalizeError {
-  err := new(NormalizeError)
-  err.err = description
-  return err
+	err := new(NormalizeError)
+	err.err = description
+	return err
 }
 
 type NormalizeError struct {
-  os.Error
-  err string
+	os.Error
+	err string
 }
 
 func (err NormalizeError) String() string {
-  return err.err
+	return err.err
 }
 
 //Character values 0-31 need to be escaped in query strings:
 var controlCharEnd int = 31
 var reservedChars = map[int]byte{
-  36: '$',
-  38: '&',
-  43: '+',
-  44: ',',
-  47: '/',
-  58: ':',
-  59: ';',
-  61: '=',
-  63: '?',
-  64: '@',
-  12: '.',
+	36: '$',
+	38: '&',
+	43: '+',
+	44: ',',
+	47: '/',
+	58: ':',
+	59: ';',
+	61: '=',
+	63: '?',
+	64: '@',
+	12: '.',
 }
 var unsafeChars = map[int]int{
-  32:  ' ',
-  34:  '"',
-  35:  '#',
-  37:  '%',
-  60:  '<',
-  62:  '>',
-  91:  '[',
-  92:  '\\',
-  93:  ']',
-  94:  '^',
-  96:  '`',
-  123: '{',
-  124: '|',
-  125: '}',
-  126: '~',
+	32:  ' ',
+	34:  '"',
+	35:  '#',
+	37:  '%',
+	60:  '<',
+	62:  '>',
+	91:  '[',
+	92:  '\\',
+	93:  ']',
+	94:  '^',
+	96:  '`',
+	123: '{',
+	124: '|',
+	125: '}',
+	126: '~',
 }
 //Character values 128-255 need to be escaped.
 var nonASCIImin int = 128
