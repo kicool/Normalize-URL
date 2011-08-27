@@ -6,33 +6,31 @@ import (
   "strings"
 )
 
-var rawURLs = [...]string{
-  "HtTp://spHela.com",
-  "HTTps://www.EXAMPLE.COM/%2d%aD/MOO#smoo",
-  "HTTps://www.EXAMPLE.COM/%2d%aD/?MO=O smoo",
-  "HTTps://www.EXAMPLE.COM/%2d%aD/MOO ",
-  "http://apphacker.com/moo/../doo/./baz/",
-  "http://apphacker.com/moo//doo//baz/",
-  "http://www.apphacker.com?",
-  "http://www.apphacker.com?boo=fuzz",
-  "http://apphacker.com/?",
-  "http://apphacker.com/?%foo=bar",
-}
-
-var normalizedURLs = [...]string{
-  "http://sphela.com/",
-  "https://www.example.com/~%AD/MOO#smoo",
-  "https://www.example.com/~%AD/?MO=O%20smoo",
-  "https://www.example.com/~%AD/MOO",
-  "http://apphacker.com/moo/doo/baz/",
-  "http://apphacker.com/moo/doo/baz/",
-  "http://www.apphacker.com/",
-  "http://www.apphacker.com/?boo=fuzz",
-  "http://apphacker.com/",
-  "http://apphacker.com/?%25foo=bar",
-}
-
 func TestNormalize(t *testing.T) {
+  rawURLs := [...]string{
+    "HtTp://spHela.com",
+    "HTTps://www.EXAMPLE.COM/%2d%aD/MOO#smoo",
+    "HTTps://www.EXAMPLE.COM/%2d%aD/?MO=O smoo",
+    "HTTps://www.EXAMPLE.COM/%2d%aD/MOO ",
+    "http://apphacker.com/moo/../doo/./baz/",
+    "http://apphacker.com/moo//doo//baz/",
+    "http://www.apphacker.com?",
+    "http://www.apphacker.com?boo=fuzz",
+    "http://apphacker.com/?",
+    "http://apphacker.com/?%foo=bar",
+  }
+  normalizedURLs := [...]string{
+    "http://sphela.com/",
+    "https://www.example.com/~%AD/MOO#smoo",
+    "https://www.example.com/~%AD/?MO=O%20smoo",
+    "https://www.example.com/~%AD/MOO",
+    "http://apphacker.com/moo/doo/baz/",
+    "http://apphacker.com/moo/doo/baz/",
+    "http://www.apphacker.com/",
+    "http://www.apphacker.com/?boo=fuzz",
+    "http://apphacker.com/",
+    "http://apphacker.com/?%25foo=bar",
+  }
   for i, checkURL := range rawURLs {
     if receivedURL, err := Normalize(checkURL); err == nil {
       if receivedURL != normalizedURLs[i] {
