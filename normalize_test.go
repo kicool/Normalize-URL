@@ -4,6 +4,7 @@ import (
   "testing"
   "strconv"
   "strings"
+  "url"
 )
 
 func TestNormalize(t *testing.T) {
@@ -32,12 +33,14 @@ func TestNormalize(t *testing.T) {
     "http://apphacker.com/?%25foo=bar",
   }
   for i, checkURL := range rawURLs {
-    if receivedURL, err := Normalize(checkURL); err == nil {
+    if URL, err := url.Parse(checkURL); err == nil {
+      Normalize(URL)
+      receivedURL := URL.String()
       if receivedURL != normalizedURLs[i] {
         t.Error("Received URL not normalized", receivedURL, normalizedURLs[i])
       }
     } else {
-      t.Error("Error while normalizing ", err)
+      t.Error("Error while parsing ", err)
     }
   }
 }
@@ -59,13 +62,15 @@ func testChar(t *testing.T, val int) {
     //Trailing whitespaces are removed.
     normalizedURL = normalizedURL + "%" + hex
   }
-  if receivedURL, err := Normalize(checkURL); err == nil {
+  if URL, err := url.Parse(checkURL); err == nil {
+    Normalize(URL)
+    receivedURL := URL.String()
     if receivedURL != normalizedURL {
       t.Error("Character not escaped right.", checkURL,
         normalizedURL, receivedURL)
     }
   } else {
-    t.Error("Error while normalizing ", err)
+    t.Error("Error while parsing ", err)
   }
 }
 
