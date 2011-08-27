@@ -37,7 +37,8 @@ func TestNormalize(t *testing.T) {
 			Normalize(URL)
 			receivedURL := URL.String()
 			if receivedURL != normalizedURLs[i] {
-				t.Error("Received URL not normalized", receivedURL, normalizedURLs[i])
+				t.Error("Received URL not normalized", receivedURL,
+					normalizedURLs[i])
 			}
 		} else {
 			t.Error("Error while parsing ", err)
@@ -123,3 +124,28 @@ func TestUnescapeChars(t *testing.T) {
 		}
 	}
 }
+
+func TestNormalizeDomain(t *testing.T) {
+}
+
+func TestNormalizeQuery(t *testing.T) {
+}
+
+func TestNormalizeQueryVariableOrder(t *testing.T) {
+}
+
+func TestNormalizeScheme(t *testing.T) {
+}
+
+func TestNormalizeWWW(t *testing.T) {
+}
+
+func TestRemoveDefaultQueryValues(t *testing.T) {
+}
+
+func TestRemoveDirectoryIndex(t *testing.T) {
+}
+
+func TestRemoveFragment(t *testing.T) {
+}
+

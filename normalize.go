@@ -12,20 +12,6 @@ func Normalize(url *url.URL) (err os.Error) {
 	return nil
 }
 
-//Remove #fragment from a URL.
-func RemoveFragment(url *url.URL) {
-}
-
-//Replaces domain or IP with given domain. Use to replace IP addresses with
-//domain or domains that point to the same resource as prime domain.
-func NormalizeDomain(url *url.URL, domain string) {
-}
-
-//Removes www. from a URL. Use if www. points to same resource as
-//non-www address.
-func NormalizeWWW(url *url.URL) {
-}
-
 //Removes directory indexes when they point to the same place as
 //the directory. For example if index.html points to / and
 //index.html is given for the index parameter it will be removed
@@ -39,8 +25,15 @@ func RemoveDirectoryIndex(url *url.URL, index string) {
 func NormalizeQueryVariableOrder(url *url.URL) {
 }
 
-//Remove query variables that have default values.
-func RemoveDefaultQueryValues(url *url.URL) {
+//Remove query variables that have default values.  Provide a set of defaults
+//(defaults[key] = value) wher key is the variable name and value is the string
+//represenation of the default value.
+func RemoveDefaultQueryValues(url *url.URL, defaults map[string] string) {
+}
+
+//Removes www. from a URL. Use if www. points to same resource as
+//non-www address.
+func NormalizeWWW(url *url.URL) {
 }
 
 //Remove arbitary query variables. Include a slice of array variables
@@ -52,6 +45,15 @@ func NormalizeQuery(url *url.URL, params []string) {
 //Normalize scheme or protocol. For example if valid scheme is url
 //and not urls, url is changed to url if 'url' is given as scheme.
 func NormalizeScheme(url *url.URL, scheme string) {
+}
+
+//Remove #fragment from a URL.
+func RemoveFragment(url *url.URL) {
+}
+
+//Replaces domain or IP with given domain. Use to replace IP addresses with
+//domain or domains that point to the same resource as prime domain.
+func NormalizeDomain(url *url.URL, domain string) {
 }
 
 func NewNormalizeError(description string) *NormalizeError {
