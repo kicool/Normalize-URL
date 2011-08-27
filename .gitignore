@@ -1,0 +1,7 @@
+*.6
+*.out
+_test
+_testmain.go
+_obj
+bin
+normalize
