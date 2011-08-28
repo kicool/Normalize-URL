@@ -5,6 +5,8 @@ package normalize
 
 import (
 	"os"
+	"sort"
+	"strings"
 	"url"
 )
 
@@ -33,6 +35,23 @@ func RemoveDirectoryIndex(url *url.URL, index string) {
 //in a query string should not matter, but some implementations
 //may require an order, so this is in a separate emthod.
 func NormalizeQueryVariableOrder(url *url.URL) {
+	keys := []string{}
+	values := url.Query()
+	for k, _ := range values {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	variables := []string{}
+	for _, key := range keys {
+		for _, value := range values[key] {
+			if len(value) > 0 {
+				variables = append(variables, key+"="+value)
+			} else {
+				variables = append(variables, key)
+			}
+		}
+	}
+	url.RawQuery = strings.Join(variables, "&")
 }
 
 //Remove query variables that have default values.  Provide a set of defaults
