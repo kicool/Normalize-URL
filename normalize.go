@@ -1,3 +1,6 @@
+// Package normalize normalizes URLs
+// See RFC 3986 and the built in URL package.
+// URLs are best parsed with ParseWithReference as this includes the fragment.
 package normalize
 
 import (
@@ -17,6 +20,13 @@ func Normalize(url *url.URL) (err os.Error) {
 //index.html is given for the index parameter it will be removed
 //from the URL
 func RemoveDirectoryIndex(url *url.URL, index string) {
+	pathLen := len(url.Path)
+	indexLen := len(index)
+	if pathLen >= indexLen {
+		if url.Path[pathLen-indexLen:] == index {
+			url.Path = url.Path[:pathLen-indexLen]
+		}
+	}
 }
 
 //Ordes query variables in alphabetic order. Order of variables
@@ -28,7 +38,7 @@ func NormalizeQueryVariableOrder(url *url.URL) {
 //Remove query variables that have default values.  Provide a set of defaults
 //(defaults[key] = value) wher key is the variable name and value is the string
 //represenation of the default value.
-func RemoveDefaultQueryValues(url *url.URL, defaults map[string] string) {
+func RemoveDefaultQueryValues(url *url.URL, defaults map[string]string) {
 }
 
 //Removes www. from a URL. Use if www. points to same resource as
@@ -49,6 +59,7 @@ func NormalizeScheme(url *url.URL, scheme string) {
 
 //Remove #fragment from a URL.
 func RemoveFragment(url *url.URL) {
+	url.Fragment = ""
 }
 
 //Replaces domain or IP with given domain. Use to replace IP addresses with

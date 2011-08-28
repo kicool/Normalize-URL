@@ -33,7 +33,7 @@ func TestNormalize(t *testing.T) {
 		"http://apphacker.com/?%25foo=bar",
 	}
 	for i, checkURL := range rawURLs {
-		if URL, err := url.Parse(checkURL); err == nil {
+		if URL, err := url.ParseWithReference(checkURL); err == nil {
 			Normalize(URL)
 			receivedURL := URL.String()
 			if receivedURL != normalizedURLs[i] {
@@ -63,7 +63,7 @@ func testChar(t *testing.T, val int) {
 		//Trailing whitespaces are removed.
 		normalizedURL = normalizedURL + "%" + hex
 	}
-	if URL, err := url.Parse(checkURL); err == nil {
+	if URL, err := url.ParseWithReference(checkURL); err == nil {
 		Normalize(URL)
 		receivedURL := URL.String()
 		if receivedURL != normalizedURL {
@@ -137,7 +137,7 @@ func TestNormalizeDomain(t *testing.T) {
 		"http://www.google.com/",
 	}
 	for i, checkURL := range urls {
-		if URL, err := url.Parse(checkURL); err == nil {
+		if URL, err := url.ParseWithReference(checkURL); err == nil {
 			NormalizeDomain(URL, "www.google.com")
 			receivedURL := URL.String()
 			if receivedURL != formatted[i] {
@@ -164,7 +164,7 @@ func TestNormalizeQuery(t *testing.T) {
 	}
 	params := [...]string{"fuzz", "foo"}
 	for i, checkURL := range urls {
-		if URL, err := url.Parse(checkURL); err == nil {
+		if URL, err := url.ParseWithReference(checkURL); err == nil {
 			NormalizeQuery(URL, params[:])
 			receivedURL := URL.String()
 			if receivedURL != formatted[i] {
@@ -189,7 +189,7 @@ func TestNormalizeQueryVariableOrder(t *testing.T) {
 		"http://gogl.net/?foo=bar&fuzz=baz&snow=cold",
 	}
 	for i, checkURL := range urls {
-		if URL, err := url.Parse(checkURL); err == nil {
+		if URL, err := url.ParseWithReference(checkURL); err == nil {
 			NormalizeQueryVariableOrder(URL)
 			receivedURL := URL.String()
 			if receivedURL != formatted[i] {
@@ -214,7 +214,7 @@ func TestNormalizeScheme(t *testing.T) {
 		"http://gogl.net/?fuzz=baz&snow=cold&foo=bar",
 	}
 	for i, checkURL := range urls {
-		if URL, err := url.Parse(checkURL); err == nil {
+		if URL, err := url.ParseWithReference(checkURL); err == nil {
 			NormalizeScheme(URL, "http")
 			receivedURL := URL.String()
 			if receivedURL != formatted[i] {
@@ -239,7 +239,7 @@ func TestNormalizeWWWShow(t *testing.T) {
 		"http://www.gogl.net/?fuzz=baz&snow=cold&foo=bar",
 	}
 	for i, checkURL := range urls {
-		if URL, err := url.Parse(checkURL); err == nil {
+		if URL, err := url.ParseWithReference(checkURL); err == nil {
 			NormalizeWWW(URL, true)
 			receivedURL := URL.String()
 			if receivedURL != formatted[i] {
@@ -264,7 +264,7 @@ func TestNormalizeWWWHide(t *testing.T) {
 		"http://gogl.net/?fuzz=baz&snow=cold&foo=bar",
 	}
 	for i, checkURL := range urls {
-		if URL, err := url.Parse(checkURL); err == nil {
+		if URL, err := url.ParseWithReference(checkURL); err == nil {
 			NormalizeWWW(URL, false)
 			receivedURL := URL.String()
 			if receivedURL != formatted[i] {
@@ -293,7 +293,7 @@ func TestRemoveDefaultQueryValues(t *testing.T) {
 		"fuzz": "baz",
 	}
 	for i, checkURL := range urls {
-		if URL, err := url.Parse(checkURL); err == nil {
+		if URL, err := url.ParseWithReference(checkURL); err == nil {
 			RemoveDefaultQueryValues(URL, defaults)
 			receivedURL := URL.String()
 			if receivedURL != formatted[i] {
@@ -323,7 +323,7 @@ func TestRemoveDirectoryIndex(t *testing.T) {
 	}
 	index := "index.html"
 	for i, checkURL := range urls {
-		if URL, err := url.Parse(checkURL); err == nil {
+		if URL, err := url.ParseWithReference(checkURL); err == nil {
 			RemoveDirectoryIndex(URL, index)
 			receivedURL := URL.String()
 			if receivedURL != formatted[i] {
@@ -340,15 +340,17 @@ func TestRemoveFragment(t *testing.T) {
 	urls := [...]string{
 		"http://74.125.224.49/path/tostuff/index.html/?foo=bar&fuzz=234#moo",
 		"https://www.google.com/search/index.html#?nothing&flow=index.html",
+		"http://gogl.net/index.html#test#more#tests",
 		"http://gogl.net/index.html#index.html",
 	}
 	formatted := [...]string{
 		"http://74.125.224.49/path/tostuff/index.html/?foo=bar&fuzz=234",
 		"https://www.google.com/search/index.html",
 		"http://gogl.net/index.html",
+		"http://gogl.net/index.html",
 	}
 	for i, checkURL := range urls {
-		if URL, err := url.Parse(checkURL); err == nil {
+		if URL, err := url.ParseWithReference(checkURL); err == nil {
 			RemoveFragment(URL)
 			receivedURL := URL.String()
 			if receivedURL != formatted[i] {
