@@ -283,9 +283,9 @@ func TestRemoveDefaultQueryValues(t *testing.T) {
 		"https://www.gooooogle.com/search/?nothing&flow=this&car=bar&foo=1",
 		"http://gogl.net/?fuzz=baz&snow=cold&foo=bar",
 	}
-	formatted := [...]string{
-		"http://74.125.224.49/path/tostuff/?atari=this",
-		"https://gooooogle.com/search/?nothing&flow=this&foo=1",
+	expectedValues := [...]string{
+		"http://74.125.224.49/path/tostuff/?fuzz=234&atari=this",
+		"https://www.gooooogle.com/search/?nothing&flow=this&car=bar&foo=1",
 		"http://gogl.net/?snow=cold",
 	}
 	defaults := map[string]string{
@@ -293,15 +293,16 @@ func TestRemoveDefaultQueryValues(t *testing.T) {
 		"fuzz": "baz",
 	}
 	for i, checkURL := range urls {
-		if URL, err := url.ParseWithReference(checkURL); err == nil {
-			RemoveDefaultQueryValues(URL, defaults)
-			receivedURL := URL.String()
-			if receivedURL != formatted[i] {
-				t.Error("RemoveDefaultQueryValues failed", checkURL,
-					receivedURL, formatted[i])
-			}
-		} else {
-			t.Error("Error parsing URL")
+		URL, _ := url.ParseWithReference(checkURL)
+		formattedURL, _ := url.ParseWithReference(expectedValues[i])
+		RemoveDefaultQueryValues(URL, defaults)
+		NormalizeQueryVariableOrder(URL)
+		NormalizeQueryVariableOrder(formattedURL)
+		receivedURL := URL.String()
+		formatted := formattedURL.String()
+		if receivedURL != formatted {
+			t.Error("RemoveDefaultQueryValues failed", checkURL,
+				receivedURL, formatted)
 		}
 	}
 }

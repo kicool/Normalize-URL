@@ -58,6 +58,25 @@ func NormalizeQueryVariableOrder(url *url.URL) {
 //(defaults[key] = value) wher key is the variable name and value is the string
 //represenation of the default value.
 func RemoveDefaultQueryValues(url *url.URL, defaults map[string]string) {
+	keys := []string{}
+	values := url.Query()
+	for k, _ := range values {
+		keys = append(keys, k)
+	}
+	variables := []string{}
+	for _, key := range keys {
+		defaultValue, ok := defaults[key]
+		for _, value := range values[key] {
+			if len(value) > 0 {
+				if !ok || value != defaultValue {
+					variables = append(variables, key+"="+value)
+				}
+			} else {
+				variables = append(variables, key)
+			}
+		}
+	}
+	url.RawQuery = strings.Join(variables, "&")
 }
 
 //Removes www. from a URL. Use if www. points to same resource as
