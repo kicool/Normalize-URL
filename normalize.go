@@ -33,7 +33,7 @@ func RemoveDefaultQueryValues(url *url.URL, defaults map[string] string) {
 
 //Removes www. from a URL. Use if www. points to same resource as
 //non-www address.
-func NormalizeWWW(url *url.URL) {
+func NormalizeWWW(url *url.URL, showWWW bool) {
 }
 
 //Remove arbitary query variables. Include a slice of array variables
