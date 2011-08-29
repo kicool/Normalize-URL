@@ -10,6 +10,7 @@ import (
 func TestNormalize(t *testing.T) {
 	rawURLs := [...]string{
 		"HtTp://spHela.com",
+		"HtTp://spHela.com:80/foo?baz=moo",
 		"HTTps://www.EXAMPLE.COM/%2d%aD/MOO#smoo",
 		"HTTps://www.EXAMPLE.COM/%2d%aD/?MO=O smoo",
 		"HTTps://www.EXAMPLE.COM/%2d%aD/MOO ",
@@ -22,6 +23,7 @@ func TestNormalize(t *testing.T) {
 	}
 	normalizedURLs := [...]string{
 		"http://sphela.com/",
+		"http://sphela.com/foo?baz=moo",
 		"https://www.example.com/~%AD/MOO#smoo",
 		"https://www.example.com/~%AD/?MO=O%20smoo",
 		"https://www.example.com/~%AD/MOO",
@@ -159,17 +161,20 @@ func TestNormalizeQuery(t *testing.T) {
 	formatted := [...]string{
 		"http://74.125.224.49/path/tostuff/?foo=bar",
 		"https://gooooogle.com/search/?fuzz=bar",
-		"http://www.google.com/path/tostuff/?foo=bar",
 		"http://gogl.net/?fuzz=baz&foo=bar",
 	}
 	params := [...]string{"fuzz", "foo"}
 	for i, checkURL := range urls {
 		if URL, err := url.ParseWithReference(checkURL); err == nil {
 			NormalizeQuery(URL, params[:])
+			formattedURL, _ := url.ParseWithReference(formatted[i])
+			NormalizeQueryVariableOrder(URL)
+			NormalizeQueryVariableOrder(formattedURL)
 			receivedURL := URL.String()
-			if receivedURL != formatted[i] {
+			expected := formattedURL.String()
+			if receivedURL != expected {
 				t.Error("NormalizeQuery failed", checkURL, receivedURL,
-					formatted[i])
+					expected)
 			}
 		} else {
 			t.Error("Error parsing URL")
@@ -206,7 +211,7 @@ func TestNormalizeScheme(t *testing.T) {
 	urls := [...]string{
 		"http://74.125.224.49/path/tostuff/?zar=bar&atari=this",
 		"https://gooooogle.com/search/?nothing&flow=this&car=bar",
-		"file:///gogl.net/?fuzz=baz&snow=cold&foo=bar",
+		"file://gogl.net/?fuzz=baz&snow=cold&foo=bar",
 	}
 	formatted := [...]string{
 		"http://74.125.224.49/path/tostuff/?zar=bar&atari=this",
@@ -230,13 +235,17 @@ func TestNormalizeScheme(t *testing.T) {
 func TestNormalizeWWWShow(t *testing.T) {
 	urls := [...]string{
 		"http://74.125.224.49/path/tostuff/?zar=bar&atari=this",
+		"http://2001:0db8:85a3:0000:0000:8a2e:0370:7334/path/tostuff",
 		"https://www.gooooogle.com/search/?nothing&flow=this&car=bar",
 		"http://gogl.net/?fuzz=baz&snow=cold&foo=bar",
+		"http://gogl.net:8080/?fuzz=baz&snow=cold&foo=bar",
 	}
 	formatted := [...]string{
 		"http://74.125.224.49/path/tostuff/?zar=bar&atari=this",
+		"http://2001:0db8:85a3:0000:0000:8a2e:0370:7334/path/tostuff",
 		"https://www.gooooogle.com/search/?nothing&flow=this&car=bar",
 		"http://www.gogl.net/?fuzz=baz&snow=cold&foo=bar",
+		"http://www.gogl.net:8080/?fuzz=baz&snow=cold&foo=bar",
 	}
 	for i, checkURL := range urls {
 		if URL, err := url.ParseWithReference(checkURL); err == nil {
@@ -255,13 +264,17 @@ func TestNormalizeWWWShow(t *testing.T) {
 func TestNormalizeWWWHide(t *testing.T) {
 	urls := [...]string{
 		"http://74.125.224.49/path/tostuff/?zar=bar&atari=this",
+		"http://2001:0db8:85a3:0000:0000:8a2e:0370:7334/path/tostuff",
 		"https://www.gooooogle.com/search/?nothing&flow=this&car=bar",
 		"http://gogl.net/?fuzz=baz&snow=cold&foo=bar",
+		"http://www.gogl.net:8080/?fuzz=baz&snow=cold&foo=bar",
 	}
 	formatted := [...]string{
 		"http://74.125.224.49/path/tostuff/?zar=bar&atari=this",
+		"http://2001:0db8:85a3:0000:0000:8a2e:0370:7334/path/tostuff",
 		"https://gooooogle.com/search/?nothing&flow=this&car=bar",
 		"http://gogl.net/?fuzz=baz&snow=cold&foo=bar",
+		"http://gogl.net:8080/?fuzz=baz&snow=cold&foo=bar",
 	}
 	for i, checkURL := range urls {
 		if URL, err := url.ParseWithReference(checkURL); err == nil {

@@ -5,6 +5,7 @@ package normalize
 
 import (
 	"os"
+	"regexp"
 	"sort"
 	"strings"
 	"url"
@@ -82,17 +83,57 @@ func RemoveDefaultQueryValues(url *url.URL, defaults map[string]string) {
 //Removes www. from a URL. Use if www. points to same resource as
 //non-www address.
 func NormalizeWWW(url *url.URL, showWWW bool) {
+	var foundWWW bool
+	ipv6Regexp, _ := regexp.Compile("([0-9A-F]+:)+[0-9A-F]+")
+	ipv4Regexp, _ := regexp.Compile("([0-9]+[.])+[0-9]+")
+	if found := ipv6Regexp.FindStringIndex(url.Host); found != nil {
+		return
+	}
+	if found := ipv4Regexp.FindStringIndex(url.Host); found != nil {
+		return
+	}
+	if len(url.Host) <= 4 {
+		foundWWW = false
+	} else {
+		foundWWW = url.Host[:4] == "www."
+	}
+	if showWWW && !foundWWW {
+		url.Host = "www." + url.Host
+	} else if !showWWW && foundWWW {
+		url.Host = url.Host[4:]
+	}
 }
 
 //Remove arbitary query variables. Include a slice of array variables
 //to check against. If query variables are found not in the given slice,
 //they are removed.
 func NormalizeQuery(url *url.URL, params []string) {
+	keys := []string{}
+	values := url.Query()
+	for k, _ := range values {
+		keys = append(keys, k)
+	}
+	variables := []string{}
+	for _, key := range keys {
+		for _, expectedParam := range params {
+			if expectedParam == key {
+				for _, value := range values[key] {
+					if len(value) > 0 {
+						variables = append(variables, key+"="+value)
+					} else {
+						variables = append(variables, key)
+					}
+				}
+			}
+		}
+	}
+	url.RawQuery = strings.Join(variables, "&")
 }
 
 //Normalize scheme or protocol. For example if valid scheme is url
 //and not urls, url is changed to url if 'url' is given as scheme.
 func NormalizeScheme(url *url.URL, scheme string) {
+	url.Scheme = scheme
 }
 
 //Remove #fragment from a URL.
@@ -103,6 +144,7 @@ func RemoveFragment(url *url.URL) {
 //Replaces domain or IP with given domain. Use to replace IP addresses with
 //domain or domains that point to the same resource as prime domain.
 func NormalizeDomain(url *url.URL, domain string) {
+	url.Host = domain
 }
 
 func NewNormalizeError(description string) *NormalizeError {
