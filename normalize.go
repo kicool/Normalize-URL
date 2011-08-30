@@ -4,6 +4,7 @@
 package normalize
 
 import (
+	"fmt"
 	"os"
 	"regexp"
 	"sort"
@@ -11,11 +12,61 @@ import (
 	"url"
 )
 
+var ipv6Regexp, _ = regexp.Compile("([0-9A-F]+:)+[0-9A-F]+")
+var ipv4Regexp, _ = regexp.Compile("([0-9]+[.])+[0-9]+")
+
 //Naive normalization, normalizes those aspects of a URL it can
 //without knowing much about it. Does not make changes that might
 //change the location which the URL points to
 func Normalize(url *url.URL) (err os.Error) {
+	fmt.Printf("\nurl: %#v\n\n", url)
+	//Current implementation goes through the URL with multiple passes,
+	//fixing something different with each pass. A better implementation
+	//might combine all of these changes into a single pass.
+	addSlash(url)
+	removeDefaultPort(url)
+	lowerCaseScheme(url)
+	lowerCaseDomain(url)
+	removeDoubleSlashes(url)
+	removeDirectoryDots(url)
 	return nil
+}
+
+func removeDirectoryDots(url *url.URL) {
+	url.Path = strings.Replace(url.Path, "/./", "/", -1)
+	url.Path = strings.Replace(url.Path, "/../", "/", -1)
+}
+
+func removeDoubleSlashes(url *url.URL) {
+	url.Path = strings.Replace(url.Path, "//", "/", -1)
+}
+
+func lowerCaseDomain(url *url.URL) {
+	url.Host = strings.ToLower(url.Host)
+}
+
+func lowerCaseScheme(url *url.URL) {
+	url.Scheme = strings.ToLower(url.Scheme)
+}
+
+func removeDefaultPort(url *url.URL) {
+	//Have to ensure that not removing the last part of an ipv6
+	//address if it happens to be :80 as unlikely as that may be.
+	host := url.Host
+	if host[len(host)-3:] == ":80" {
+		if found := ipv6Regexp.FindStringIndex(url.Host); found != nil {
+			if strings.Count(host, ":") < 8 {
+				return
+			}
+		}
+		url.Host = host[:len(host)-3]
+	}
+}
+
+func addSlash(url *url.URL) {
+	if len(url.Path) == 0 {
+		url.Path = "/"
+	}
 }
 
 //Removes directory indexes when they point to the same place as
@@ -84,8 +135,6 @@ func RemoveDefaultQueryValues(url *url.URL, defaults map[string]string) {
 //non-www address.
 func NormalizeWWW(url *url.URL, showWWW bool) {
 	var foundWWW bool
-	ipv6Regexp, _ := regexp.Compile("([0-9A-F]+:)+[0-9A-F]+")
-	ipv4Regexp, _ := regexp.Compile("([0-9]+[.])+[0-9]+")
 	if found := ipv6Regexp.FindStringIndex(url.Host); found != nil {
 		return
 	}
