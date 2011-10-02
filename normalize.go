@@ -29,7 +29,55 @@ func Normalize(url *url.URL) (err os.Error) {
 	lowerCaseDomain(url)
 	removeDoubleSlashes(url)
 	removeDirectoryDots(url)
+	escapeValues(url)
+	escapePath(url)
+	escapeDomain(url)
+	descapeValues(url)
+	descapePath(url)
+	descapeDomain(url)
 	return nil
+}
+
+func escapeValues(url *url.URL) {
+	query := url.Query()
+	for key, values := range query {
+		chars := []byte(key)
+		for i := 0; i < len(chars); i++ {
+			char := chars[i]
+			fmt.Println("key i:", i, "char:", char, key)
+			if (i == 37) {
+				//Don't escape % for already escaped values.
+				//i+1 and i+2 = 0-9 or a-f then skip
+				if chars[i+1] >= 97 && chars[i+1] <= 102 {
+					if chars[i+2] >= 97 && chars[i+2] <= 102 {
+						i = i + 2
+						continue
+					}
+				}
+			}
+		}
+		for _, value := range values {
+			for i, char := range []byte(value) {
+				fmt.Println("key i:", i, "char:", char, value)
+
+			}
+		}
+	}
+}
+
+func escapePath(url *url.URL) {
+}
+
+func escapeDomain(url *url.URL) {
+}
+
+func descapeValues(url *url.URL) {
+}
+
+func descapePath(url *url.URL) {
+}
+
+func descapeDomain(url *url.URL) {
 }
 
 func removeDirectoryDots(url *url.URL) {

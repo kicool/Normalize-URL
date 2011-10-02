@@ -52,58 +52,77 @@ func TestNormalize(t *testing.T) {
 	}
 }
 
-func testChar(t *testing.T, val int) {
+func testChar(t *testing.T, val int, ensureUnescaped bool) {
 	var (
 		char byte
 		hex  string
 	)
-	testURL := "http://google.com?moo=doo"
+	testURL := "http://google.com/search?moo=doo"
 	char = byte(val)
+	if char == ' ' {
+		return
+	}
 	hex = strings.ToUpper(strconv.Itob(val, 16))
 	if len(hex) == 1 {
 		hex = "0" + hex
 	}
-	checkURL := testURL + string(char)
-	normalizedURL := testURL
-	if char != ' ' {
-		//Trailing whitespaces are removed.
-		normalizedURL = normalizedURL + "%" + hex
-	}
-	if URL, err := url.ParseWithReference(checkURL); err == nil {
-		Normalize(URL)
-		receivedURL := URL.String()
-		if receivedURL != normalizedURL {
-			t.Error("Character not escaped right.", checkURL,
-				normalizedURL, receivedURL)
-		}
+	checkURL, _ := url.ParseWithReference(testURL);
+	normalizedURL, _ := url.ParseWithReference(testURL);
+	if ensureUnescaped {
+		addStringToParts(string(char), checkURL)
+		addStringToParts(string(char), normalizedURL)
 	} else {
-		t.Error("Error while parsing ", err)
+		addStringToParts(string(char), checkURL)
+		addStringToParts(hex, normalizedURL)
 	}
+	Normalize(checkURL)
+	if checkURL.String() != normalizedURL.String() {
+		t.Error("Character not escaped right.", checkURL.String(),
+			normalizedURL.String())
+	}
+}
+
+func addStringToParts(addition string, URL *url.URL) {
+	URL.Host += addition
+	URL.Path += addition
+	query := URL.Query()
+	for key, values := range query {
+		newValues := make([]string, len(values))
+		for i, value := range values {
+			newValues[i] = value + addition
+		}
+		query.Del(key)
+		newKey := key + addition
+		for _, value := range newValues {
+			query.Add(newKey, value)
+		}
+	}
+	URL.RawQuery = query.Encode()
 }
 
 func TestControlChars(t *testing.T) {
 	for i := 0; i < controlCharEnd; i++ {
-		testChar(t, i)
+		testChar(t, i, false)
 	}
 }
 
 func TestReservedChars(t *testing.T) {
 	for val, _ := range reservedChars {
-		testChar(t, val)
+		testChar(t, val, false)
 	}
 }
 
 func TestSomeUnsafeChars(t *testing.T) {
 	for val, _ := range unsafeChars {
 		if val != 35 || val != 37 {
-			testChar(t, val)
+			testChar(t, val, false)
 		}
 	}
 }
 
 func TestNonASCIIChars(t *testing.T) {
 	for i := nonASCIImin; i <= nonASCIImax; i++ {
-		testChar(t, i)
+		testChar(t, i, false)
 	}
 }
 
@@ -113,7 +132,7 @@ func TestUnescapeChars(t *testing.T) {
 		_, unsafe := unsafeChars[i]
 		switch {
 		default:
-			//Test char to make sure it's not escaped after normalized.
+			testChar(t, i, true)
 			t.Log("Searching and testing against", i)
 		case i <= controlCharEnd:
 			t.Log("Less than controlCharEnd", i, controlCharEnd)
