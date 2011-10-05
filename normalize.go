@@ -4,7 +4,6 @@
 package normalize
 
 import (
-	"os"
 	"regexp"
 	"sort"
 	"strings"
@@ -14,14 +13,13 @@ import (
 var ipv6Regexp, _ = regexp.Compile("([0-9A-F]+:)+[0-9A-F]+")
 var ipv4Regexp, _ = regexp.Compile("([0-9]+[.])+[0-9]+")
 
-func Normalize(url *url.URL) (err os.Error) {
+func Normalize(url *url.URL) {
 	addSlash(url)
 	removeDefaultPort(url)
 	lowerCaseScheme(url)
 	lowerCaseDomain(url)
 	removeDoubleSlashes(url)
 	removeDirectoryDots(url)
-	return nil
 }
 
 func removeDirectoryDots(url *url.URL) {
