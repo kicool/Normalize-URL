@@ -2,8 +2,6 @@ package normalize
 
 import (
 	"testing"
-	"strconv"
-	"strings"
 	"url"
 )
 
@@ -14,6 +12,8 @@ func TestNormalize(t *testing.T) {
 		"http://2001:0db8:85a3:0000:0000:8a2e:0370:7334:80/path/tostuff",
 		"http://2001:0db8:85a3:0000:0000:8a2e:0370:80/path/tostuff",
 		"HTTps://www.EXAMPLE.COM/%2d%aD/MOO#smoo",
+		"HTTps://www.EXAMPLE.COM/%2d%aD/?MO=O%20smoo",
+		"HTTps://www.EXAMPLE.COM/%2d%aD/?MO=O+smoo",
 		"HTTps://www.EXAMPLE.COM/%2d%aD/?MO=O smoo",
 		"HTTps://www.EXAMPLE.COM/%2d%aD/MOO ",
 		"http://apphacker.com/moo/../doo/./baz/",
@@ -28,15 +28,17 @@ func TestNormalize(t *testing.T) {
 		"http://sphela.com/foo?baz=moo",
 		"http://2001:0db8:85a3:0000:0000:8a2e:0370:7334/path/tostuff",
 		"http://2001:0db8:85a3:0000:0000:8a2e:0370:80/path/tostuff",
-		"https://www.example.com/~%AD/MOO#smoo",
-		"https://www.example.com/~%AD/?MO=O%20smoo",
-		"https://www.example.com/~%AD/MOO",
+		"https://www.example.com/-%AD/MOO#smoo",
+		"https://www.example.com/-%AD/?MO=O%20smoo",
+		"https://www.example.com/-%AD/?MO=O+smoo",
+		"https://www.example.com/-%AD/?MO=O smoo",
+		"https://www.example.com/-%AD/MOO%20",
 		"http://apphacker.com/moo/doo/baz/",
 		"http://apphacker.com/moo/doo/baz/",
 		"http://www.apphacker.com/",
 		"http://www.apphacker.com/?boo=fuzz",
 		"http://apphacker.com/",
-		"http://apphacker.com/?%25foo=bar",
+		"http://apphacker.com/?%foo=bar",
 	}
 	for i, checkURL := range rawURLs {
 		if URL, err := url.ParseWithReference(checkURL); err == nil {
@@ -52,103 +54,10 @@ func TestNormalize(t *testing.T) {
 	}
 }
 
-func testChar(t *testing.T, val int, ensureUnescaped bool) {
-	var (
-		char byte
-		hex  string
-	)
-	testURL := "http://google.com/search?moo=doo"
-	char = byte(val)
-	if char == ' ' {
-		return
-	}
-	hex = strings.ToUpper(strconv.Itob(val, 16))
-	if len(hex) == 1 {
-		hex = "0" + hex
-	}
-	checkURL, _ := url.ParseWithReference(testURL);
-	normalizedURL, _ := url.ParseWithReference(testURL);
-	if ensureUnescaped {
-		addStringToParts(string(char), checkURL)
-		addStringToParts(string(char), normalizedURL)
-	} else {
-		addStringToParts(string(char), checkURL)
-		addStringToParts(hex, normalizedURL)
-	}
-	Normalize(checkURL)
-	if checkURL.String() != normalizedURL.String() {
-		t.Error("Character not escaped right.", checkURL.String(),
-			normalizedURL.String())
-	}
-}
 
-func addStringToParts(addition string, URL *url.URL) {
-	URL.Host += addition
-	URL.Path += addition
-	query := URL.Query()
-	for key, values := range query {
-		newValues := make([]string, len(values))
-		for i, value := range values {
-			newValues[i] = value + addition
-		}
-		query.Del(key)
-		newKey := key + addition
-		for _, value := range newValues {
-			query.Add(newKey, value)
-		}
-	}
-	URL.RawQuery = query.Encode()
-}
 
-func TestControlChars(t *testing.T) {
-	for i := 0; i < controlCharEnd; i++ {
-		testChar(t, i, false)
-	}
-}
 
-func TestReservedChars(t *testing.T) {
-	for val, _ := range reservedChars {
-		testChar(t, val, false)
-	}
-}
 
-func TestSomeUnsafeChars(t *testing.T) {
-	for val, _ := range unsafeChars {
-		if val != 35 || val != 37 {
-			testChar(t, val, false)
-		}
-	}
-}
-
-func TestNonASCIIChars(t *testing.T) {
-	for i := nonASCIImin; i <= nonASCIImax; i++ {
-		testChar(t, i, false)
-	}
-}
-
-func TestUnescapeChars(t *testing.T) {
-	for i := 0; i < 256; i++ {
-		_, reserved := reservedChars[i]
-		_, unsafe := unsafeChars[i]
-		switch {
-		default:
-			testChar(t, i, true)
-			t.Log("Searching and testing against", i)
-		case i <= controlCharEnd:
-			t.Log("Less than controlCharEnd", i, controlCharEnd)
-			continue
-		case i >= nonASCIImin && i <= nonASCIImax:
-			t.Log("In non-ASCII range", i, nonASCIImin, nonASCIImax)
-			continue
-		case reserved:
-			t.Log("In reservedChars", i, reservedChars[i])
-			continue
-		case unsafe:
-			t.Log("In unsafeChars", i, unsafeChars[i])
-			continue
-		}
-	}
-}
 
 func TestNormalizeDomain(t *testing.T) {
 	urls := [...]string{
