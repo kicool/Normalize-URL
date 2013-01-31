@@ -4,10 +4,10 @@
 package normalize
 
 import (
+	"net/url"
 	"regexp"
 	"sort"
 	"strings"
-	"url"
 )
 
 var ipv6Regexp, _ = regexp.Compile("([0-9A-F]+:)+[0-9A-F]+")
@@ -203,4 +203,3 @@ func RemoveFragment(url *url.URL) {
 func NormalizeDomain(url *url.URL, domain string) {
 	url.Host = domain
 }
-

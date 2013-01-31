@@ -1,8 +1,8 @@
 package normalize
 
 import (
+	"net/url"
 	"testing"
-	"url"
 )
 
 func TestNormalize(t *testing.T) {
@@ -41,7 +41,7 @@ func TestNormalize(t *testing.T) {
 		"http://apphacker.com/?%foo=bar",
 	}
 	for i, checkURL := range rawURLs {
-		if URL, err := url.ParseWithReference(checkURL); err == nil {
+		if URL, err := url.Parse(checkURL); err == nil {
 			Normalize(URL)
 			receivedURL := URL.String()
 			if receivedURL != normalizedURLs[i] {
@@ -53,11 +53,6 @@ func TestNormalize(t *testing.T) {
 		}
 	}
 }
-
-
-
-
-
 
 func TestNormalizeDomain(t *testing.T) {
 	urls := [...]string{
@@ -71,7 +66,7 @@ func TestNormalizeDomain(t *testing.T) {
 		"http://www.google.com/",
 	}
 	for i, checkURL := range urls {
-		if URL, err := url.ParseWithReference(checkURL); err == nil {
+		if URL, err := url.Parse(checkURL); err == nil {
 			NormalizeDomain(URL, "www.google.com")
 			receivedURL := URL.String()
 			if receivedURL != formatted[i] {
@@ -97,9 +92,9 @@ func TestNormalizeQuery(t *testing.T) {
 	}
 	params := [...]string{"fuzz", "foo"}
 	for i, checkURL := range urls {
-		if URL, err := url.ParseWithReference(checkURL); err == nil {
+		if URL, err := url.Parse(checkURL); err == nil {
 			NormalizeQuery(URL, params[:])
-			formattedURL, _ := url.ParseWithReference(formatted[i])
+			formattedURL, _ := url.Parse(formatted[i])
 			NormalizeQueryVariableOrder(URL)
 			NormalizeQueryVariableOrder(formattedURL)
 			receivedURL := URL.String()
@@ -126,7 +121,7 @@ func TestNormalizeQueryVariableOrder(t *testing.T) {
 		"http://gogl.net/?foo=bar&fuzz=baz&snow=cold",
 	}
 	for i, checkURL := range urls {
-		if URL, err := url.ParseWithReference(checkURL); err == nil {
+		if URL, err := url.Parse(checkURL); err == nil {
 			NormalizeQueryVariableOrder(URL)
 			receivedURL := URL.String()
 			if receivedURL != formatted[i] {
@@ -151,7 +146,7 @@ func TestNormalizeScheme(t *testing.T) {
 		"http://gogl.net/?fuzz=baz&snow=cold&foo=bar",
 	}
 	for i, checkURL := range urls {
-		if URL, err := url.ParseWithReference(checkURL); err == nil {
+		if URL, err := url.Parse(checkURL); err == nil {
 			NormalizeScheme(URL, "http")
 			receivedURL := URL.String()
 			if receivedURL != formatted[i] {
@@ -180,7 +175,7 @@ func TestNormalizeWWWShow(t *testing.T) {
 		"http://www.gogl.net:8080/?fuzz=baz&snow=cold&foo=bar",
 	}
 	for i, checkURL := range urls {
-		if URL, err := url.ParseWithReference(checkURL); err == nil {
+		if URL, err := url.Parse(checkURL); err == nil {
 			NormalizeWWW(URL, true)
 			receivedURL := URL.String()
 			if receivedURL != formatted[i] {
@@ -209,7 +204,7 @@ func TestNormalizeWWWHide(t *testing.T) {
 		"http://gogl.net:8080/?fuzz=baz&snow=cold&foo=bar",
 	}
 	for i, checkURL := range urls {
-		if URL, err := url.ParseWithReference(checkURL); err == nil {
+		if URL, err := url.Parse(checkURL); err == nil {
 			NormalizeWWW(URL, false)
 			receivedURL := URL.String()
 			if receivedURL != formatted[i] {
@@ -238,8 +233,8 @@ func TestRemoveDefaultQueryValues(t *testing.T) {
 		"fuzz": "baz",
 	}
 	for i, checkURL := range urls {
-		URL, _ := url.ParseWithReference(checkURL)
-		formattedURL, _ := url.ParseWithReference(expectedValues[i])
+		URL, _ := url.Parse(checkURL)
+		formattedURL, _ := url.Parse(expectedValues[i])
 		RemoveDefaultQueryValues(URL, defaults)
 		NormalizeQueryVariableOrder(URL)
 		NormalizeQueryVariableOrder(formattedURL)
@@ -269,7 +264,7 @@ func TestRemoveDirectoryIndex(t *testing.T) {
 	}
 	index := "index.html"
 	for i, checkURL := range urls {
-		if URL, err := url.ParseWithReference(checkURL); err == nil {
+		if URL, err := url.Parse(checkURL); err == nil {
 			RemoveDirectoryIndex(URL, index)
 			receivedURL := URL.String()
 			if receivedURL != formatted[i] {
@@ -296,7 +291,7 @@ func TestRemoveFragment(t *testing.T) {
 		"http://gogl.net/index.html",
 	}
 	for i, checkURL := range urls {
-		if URL, err := url.ParseWithReference(checkURL); err == nil {
+		if URL, err := url.Parse(checkURL); err == nil {
 			RemoveFragment(URL)
 			receivedURL := URL.String()
 			if receivedURL != formatted[i] {
