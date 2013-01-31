@@ -6,14 +6,6 @@ http://en.wikipedia.org/wiki/URL_normalization
 This package is not overly aggressive and errs on the side of preserving a
 working URL.
 
-To install type ./build or use gb
-
-Tests are best run with gb -t
-
-gb is a third party tool that makes building Go programs and packages easier.
-
-This software is licensed with the MIT License.
-
 Copyright 2011 Apphacker apphacker@gmail.com.
 
 
