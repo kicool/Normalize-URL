@@ -24,7 +24,6 @@ func Normalize(url *url.URL) {
 }
 
 func removeDirectoryDots(url *url.URL) {
-	fmt.Println(url.Path)
 	url.Path = strings.Replace(url.Path, "/./", "/", -1)
 	if strings.Contains(url.Path, "..") {
 		seg := strings.Split(url.Path, "/")
