@@ -4,6 +4,7 @@
 package normalize
 
 import (
+	"fmt"
 	"net/url"
 	"regexp"
 	"sort"
@@ -23,8 +24,26 @@ func Normalize(url *url.URL) {
 }
 
 func removeDirectoryDots(url *url.URL) {
+	fmt.Println(url.Path)
 	url.Path = strings.Replace(url.Path, "/./", "/", -1)
-	url.Path = strings.Replace(url.Path, "/../", "/", -1)
+	if strings.Contains(url.Path, "..") {
+		seg := strings.Split(url.Path, "/")
+		stk := NewStack(1000)
+		for _, s := range seg {
+			if len(s) == 0 {
+				continue
+			}
+			if strings.EqualFold(s, string("..")) {
+				stk.Pop()
+			} else {
+				stk.Push(s)
+			}
+		}
+		if stk.Top > 0 {
+			r := stk.Data[0:stk.Top]
+			url.Path = fmt.Sprintf("/%s/", strings.Join(r, "/"))
+		}
+	}
 }
 
 func removeDoubleSlashes(url *url.URL) {

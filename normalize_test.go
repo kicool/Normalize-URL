@@ -33,7 +33,7 @@ func TestNormalize(t *testing.T) {
 		"https://www.example.com/-%AD/?MO=O+smoo",
 		"https://www.example.com/-%AD/?MO=O smoo",
 		"https://www.example.com/-%AD/MOO%20",
-		"http://apphacker.com/moo/doo/baz/",
+		"http://apphacker.com/doo/baz/",
 		"http://apphacker.com/moo/doo/baz/",
 		"http://www.apphacker.com/",
 		"http://www.apphacker.com/?boo=fuzz",
